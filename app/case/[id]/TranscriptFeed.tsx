@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { AvatarTone, TranscriptTurn } from "../../data/cases";
+import type { AvatarTone, StageGroup, TranscriptTurn } from "../../data/cases";
+import { API_URL } from "../../lib/api";
 
 // AssemblyAI Universal-Streaming v3 — real-time STT with Streaming Diarization.
 // The browser connects directly to the WSS endpoint with a short-lived token
@@ -149,10 +150,17 @@ function istTime(): string {
 export default function TranscriptFeed({
   initialTurns,
   bench,
+  stage,
+  stageGroup,
 }: {
   initialTurns: TranscriptTurn[];
   bench: string;
+  stage: string;
+  stageGroup: StageGroup;
 }) {
+  // Live transcription is only permitted while the matter is being heard —
+  // i.e. at the Arguments or Evidence stage.
+  const canRecord = stageGroup === "arguments" || stageGroup === "evidence";
   const [turns, setTurns] = useState<TranscriptTurn[]>(initialTurns);
   const [live, setLive] = useState(false);
   const [partial, setPartial] = useState<PartialTurn | null>(null);
@@ -321,8 +329,9 @@ export default function TranscriptFeed({
       // Mic first (needs the click gesture), then the streaming session.
       await startAudio();
 
-      // The API key never reaches the browser — only a 60s streaming token.
-      const res = await fetch("/api/stt-token", { method: "POST" });
+      // The API key never reaches the browser — only a 60s streaming token
+      // minted by the Elysia backend.
+      const res = await fetch(`${API_URL}/api/stt-token`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Could not mint streaming token");
 
@@ -400,22 +409,33 @@ export default function TranscriptFeed({
         ) : (
           <div className="jd-stream-empty">
             <span className="material-symbols-outlined">mic_off</span>
-            <p>
-              Bench not in session — press the <b>record button</b> below to stream {bench} audio
-              to AssemblyAI and the diarized transcript (Speaker A, B, C…) will appear here in
-              real time.
-            </p>
+            {canRecord ? (
+              <p>
+                Bench not in session — press the <b>record button</b> below to stream {bench}{" "}
+                audio to AssemblyAI and the diarized transcript (Speaker A, B, C…) will appear
+                here in real time.
+              </p>
+            ) : (
+              <p>
+                The matter is at the <b>{stage}</b> stage — live transcription is enabled only
+                during <b>Arguments</b> and <b>Evidence</b> stages.
+              </p>
+            )}
           </div>
         )}
 
-        {/* Record player — start/stop the live streaming transcription */}
-        <div className={`jd-rec-bar${live ? " on" : ""}`}>
+        {/* Record player — start/stop the live streaming transcription.
+            Only enabled at the Arguments / Evidence stage. */}
+        <div className={`jd-rec-bar${live ? " on" : ""}${canRecord ? "" : " locked"}`}>
           <button
             className={`jd-rec-btn${live ? " on" : ""}`}
             onClick={live ? stopLive : startLive}
+            disabled={!canRecord && !live}
             aria-label={live ? "Stop recording" : "Start recording"}
           >
-            <span className="material-symbols-outlined">{live ? "stop" : "mic"}</span>
+            <span className="material-symbols-outlined">
+              {live ? "stop" : canRecord ? "mic" : "lock"}
+            </span>
           </button>
           <div className="jd-rec-meta">
             {live ? (
@@ -428,12 +448,20 @@ export default function TranscriptFeed({
                   Listening — speakers are diarized automatically, tap stop to end the feed
                 </span>
               </>
-            ) : (
+            ) : canRecord ? (
               <>
                 <span className="jd-rec-time idle">Live Transcription</span>
                 <span className="jd-rec-hint">
                   Tap the mic to stream {bench} audio to AssemblyAI (Hindi/English code-switch
                   supported)
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="jd-rec-time idle">Transcription Locked</span>
+                <span className="jd-rec-hint">
+                  Live transcription opens only at the Arguments / Evidence stage — current stage:
+                  {stage}
                 </span>
               </>
             )}

@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState } from "react";
 
-export default function CaseActions({ caseNumber }: { caseNumber: string }) {
+export default function CaseActions({ caseNumber, slug }: { caseNumber: string; slug: string }) {
   const [toast, setToast] = useState<{ msg: string; show: boolean }>({ msg: "", show: false });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -15,6 +16,10 @@ export default function CaseActions({ caseNumber }: { caseNumber: string }) {
   return (
     <>
       <div className="jd-side-actions">
+        <Link href={`/case/${slug}/evidence`} className="jd-btn jd-btn-primary">
+          <span className="material-symbols-outlined">folder_special</span>
+          Evidence Locker — Submit Exhibit
+        </Link>
         <button
           className="jd-btn jd-btn-primary"
           onClick={() =>

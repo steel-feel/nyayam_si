@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import BenchTopBar from "../../components/BenchTopBar";
 import CaseActions from "./CaseActions";
 import TranscriptFeed from "./TranscriptFeed";
-import { CASES, getCaseDetail } from "../../data/cases";
+import CaseTimeline from "./Timeline";
+import { fetchCase } from "../../lib/cases";
 
-export function generateStaticParams() {
-  return CASES.map((c) => ({ id: c.slug }));
-}
+// Case data comes from the backend database at request time.
+export const dynamic = "force-dynamic";
 
 export default async function CaseDetailPage({
   params,
@@ -15,11 +15,11 @@ export default async function CaseDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const c = CASES.find((x) => x.slug === id);
-  if (!c) notFound();
-  const d = getCaseDetail(c);
-  const idx = CASES.findIndex((x) => x.slug === id);
-  const next = idx >= 0 && idx < CASES.length - 1 ? CASES[idx + 1] : null;
+  const bundle = await fetchCase(id);
+  if (!bundle) notFound();
+  const c = bundle.case;
+  const d = bundle.detail;
+  const next = bundle.next;
   const inSession = Boolean(c.live);
 
   return (
@@ -120,7 +120,13 @@ export default async function CaseDetailPage({
         {/* Main split: transcript stream + case dossier */}
         <div className="jd-detail-grid">
           <section className="jd-detail-main">
-            <TranscriptFeed initialTurns={d.transcript} bench={c.bench} />
+            <TranscriptFeed
+              initialTurns={d.transcript}
+              bench={c.bench}
+              stage={c.stage}
+              stageGroup={c.stageGroup}
+            />
+            <CaseTimeline slug={c.slug} />
           </section>
 
           <aside className="jd-detail-side">
@@ -259,7 +265,7 @@ export default async function CaseDetailPage({
                   </div>
                 </div>
               )}
-              <CaseActions caseNumber={c.caseNumber} />
+              <CaseActions caseNumber={c.caseNumber} slug={c.slug} />
             </div>
           </aside>
         </div>

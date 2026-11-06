@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { API_URL } from "../lib/api";
 
 type Receipt = {
   audio_sha256: string;
@@ -84,7 +85,7 @@ export default function Home() {
       form.append("file", file);
       form.append("language", language);
 
-      const res = await fetch("/api/transcribe", { method: "POST", body: form });
+      const res = await fetch(`${API_URL}/api/transcribe`, { method: "POST", body: form });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Transcription failed");
       setTranscript(data.text);

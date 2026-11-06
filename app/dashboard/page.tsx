@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import BenchTopBar from "../components/BenchTopBar";
-import { CASES, type StageGroup } from "../data/cases";
+import type { JudicialCase, StageGroup } from "../data/cases";
+import { API_URL } from "../lib/api";
 
 type Filter = "all" | StageGroup;
 
@@ -18,21 +19,45 @@ export default function DashboardPage() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
   const [toast, setToast] = useState<{ msg: string; show: boolean }>({ msg: "", show: false });
+  const [cases, setCases] = useState<JudicialCase[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const liveCases = CASES.filter((c) => c.live);
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`${API_URL}/api/cases`)
+      .then((r) => {
+        if (!r.ok) throw new Error(`Backend returned ${r.status}`);
+        return r.json();
+      })
+      .then((rows) => {
+        if (!cancelled) setCases(rows);
+      })
+      .catch((err) => {
+        if (!cancelled) setLoadError(err instanceof Error ? err.message : "Could not load cases");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const liveCases = cases.filter((c) => c.live);
   const counts = useMemo(
     () => ({
-      all: CASES.length,
-      arguments: CASES.filter((c) => c.stageGroup === "arguments").length,
-      evidence: CASES.filter((c) => c.stageGroup === "evidence").length,
+      all: cases.length,
+      arguments: cases.filter((c) => c.stageGroup === "arguments").length,
+      evidence: cases.filter((c) => c.stageGroup === "evidence").length,
     }),
-    []
+    [cases]
   );
 
   const rows = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return CASES.filter((c) => {
+    return cases.filter((c) => {
       if (filter !== "all" && c.stageGroup !== filter) return false;
       if (!q) return true;
       return [c.caseNumber, c.title, c.subtitle, c.stage, c.petitionerAOR, c.respondentAOR]
@@ -40,7 +65,7 @@ export default function DashboardPage() {
         .toLowerCase()
         .includes(q);
     });
-  }, [query, filter]);
+  }, [cases, query, filter]);
 
   function showToast(msg: string) {
     if (toastTimer.current) clearTimeout(toastTimer.current);
@@ -151,7 +176,7 @@ export default function DashboardPage() {
               <div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <h2 style={{ fontSize: 18 }}>Today&apos;s Pending Cases</h2>
-                  <span className="jd-chip jd-chip-gray">Cause List: {CASES.length} Causes</span>
+                  <span className="jd-chip jd-chip-gray">Cause List: {cases.length} Causes</span>
                 </div>
                 <p className="jd-table-toolbar-sub">
                   Courtroom No. 04 • Daily Judicial Roster &amp; Hearing Status
@@ -195,6 +220,21 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody>
+                {loading && (
+                  <tr style={{ cursor: "default" }}>
+                    <td colSpan={8} style={{ textAlign: "center", color: "var(--jd-muted)" }}>
+                      Loading cause list from the backend…
+                    </td>
+                  </tr>
+                )}
+                {loadError && (
+                  <tr style={{ cursor: "default" }}>
+                    <td colSpan={8} style={{ textAlign: "center", color: "var(--jd-red)" }}>
+                      Could not reach the backend ({loadError}) — start it with{" "}
+                      <code>cd ../nyayam_backend &amp;&amp; pnpm dev</code>.
+                    </td>
+                  </tr>
+                )}
                 {rows.map((c) => (
                   <tr key={c.slug} onClick={() => router.push(`/case/${c.slug}`)}>
                     <td className="cnum">{c.caseNumber}</td>
@@ -217,7 +257,7 @@ export default function DashboardPage() {
                     <td className="cupdated">{c.lastUpdate}</td>
                   </tr>
                 ))}
-                {rows.length === 0 && (
+                {!loading && !loadError && rows.length === 0 && (
                   <tr style={{ cursor: "default" }}>
                     <td colSpan={8} style={{ textAlign: "center", color: "var(--jd-muted)" }}>
                       No causes match the current filter.
@@ -234,7 +274,7 @@ export default function DashboardPage() {
               Supreme Court Digital Roster Sync Active • Certified Cause List
             </div>
             <span className="count">
-              Displaying {rows.length} of {CASES.length} Causes for Bench 04
+              Displaying {rows.length} of {cases.length} Causes for Bench 04
             </span>
           </div>
         </section>

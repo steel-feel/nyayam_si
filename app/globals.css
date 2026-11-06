@@ -1856,3 +1856,241 @@ a {
   0%, 100% { height: 22%; }
   50% { height: 100%; }
 }
+
+/* ============================================================
+   Case history timeline
+   ============================================================ */
+
+.jd-timeline {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.jd-timeline-item {
+  display: flex;
+  gap: 12px;
+}
+
+.jd-timeline-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.jd-timeline-dot {
+  width: 30px;
+  height: 30px;
+  border-radius: 9999px;
+  background: var(--jd-low);
+  border: 1px solid var(--jd-border-strong);
+  color: var(--jd-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jd-timeline-dot .material-symbols-outlined {
+  font-size: 15px;
+}
+
+.jd-timeline-item.kind-stage .jd-timeline-dot {
+  background: var(--jd-navy);
+  border-color: var(--jd-navy);
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+}
+
+.jd-timeline-item.kind-order .jd-timeline-dot {
+  color: var(--jd-secondary);
+  border-color: var(--jd-secondary);
+}
+
+.jd-timeline-item.kind-evidence .jd-timeline-dot {
+  color: var(--jd-green);
+  border-color: var(--jd-green);
+}
+
+.jd-timeline-line {
+  width: 1px;
+  flex: 1;
+  min-height: 14px;
+  background: var(--jd-border-strong);
+}
+
+.jd-timeline-body {
+  padding-bottom: 1.1rem;
+  min-width: 0;
+}
+
+.jd-timeline-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.jd-timeline-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--jd-black);
+}
+
+.jd-timeline-item.kind-stage .jd-timeline-title {
+  color: var(--jd-secondary);
+}
+
+.jd-timeline-date {
+  font-family: var(--jd-mono);
+  font-size: 11px;
+  color: var(--jd-faint);
+  white-space: nowrap;
+}
+
+.jd-timeline-detail {
+  font-size: 12px;
+  color: var(--jd-muted);
+  line-height: 1.55;
+  margin-top: 3px;
+}
+
+.jd-timeline-note {
+  font-size: 12px;
+  color: var(--jd-faint);
+  line-height: 1.6;
+}
+
+.jd-timeline-note code {
+  font-family: var(--jd-mono);
+  font-size: 11px;
+  background: var(--jd-low);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   Evidence locker
+   ============================================================ */
+
+.jd-ev-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jd-ev-form label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--jd-muted);
+  margin-top: 6px;
+}
+
+.jd-ev-form input[type="text"] {
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--jd-text);
+  background: var(--jd-low);
+  border: 1px solid var(--jd-border);
+  border-radius: 8px;
+  outline: none;
+}
+
+.jd-ev-form input[type="text"]:focus {
+  border-color: var(--jd-secondary);
+  background: var(--jd-card);
+}
+
+.jd-ev-form input[type="file"] {
+  font-size: 12px;
+  color: var(--jd-muted);
+}
+
+.jd-ev-form .jd-btn {
+  margin-top: 8px;
+  justify-content: center;
+}
+
+.jd-ev-form .jd-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.jd-ev-note {
+  font-size: 11px;
+  color: var(--jd-faint);
+  line-height: 1.6;
+  margin-top: 4px;
+}
+
+.jd-ev-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jd-ev-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.jd-ev-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--jd-black);
+}
+
+.jd-ev-meta {
+  font-size: 11px;
+  color: var(--jd-faint);
+  margin-top: 3px;
+}
+
+.jd-ev-meta code {
+  font-family: var(--jd-mono);
+  font-size: 10.5px;
+  background: var(--jd-low);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.jd-ev-img {
+  width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  background: var(--jd-low);
+  border: 1px solid var(--jd-border);
+  border-radius: 8px;
+}
+
+.jd-ev-analysis {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--jd-text);
+  background: var(--jd-low);
+  border: 1px solid var(--jd-border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Record bar locked (stage gate) */
+.jd-rec-bar.locked {
+  opacity: 0.75;
+}
+
+.jd-rec-btn:disabled {
+  background: var(--jd-highest);
+  color: var(--jd-faint);
+  cursor: not-allowed;
+}
+
+.jd-rec-btn:disabled:hover {
+  background: var(--jd-highest);
+}
