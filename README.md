@@ -1,7 +1,6 @@
-# NyayaTEE — Confidential Courtroom ASR & Verifiable Evidence Ledger
+# Nyayam.si — Confidential Courtroom ASR & Verifiable Evidence Ledger
 
-Hackathon project (see `../nyayam.pdf` for the concept note): confidential
-courtroom transcription in the Indian judicial context, running inside a
+Confidential courtroom transcription in the Indian judicial context, running inside a
 hardware-sealed **TEE enclave on 0G Private Computer** (0G Mainnet), with
 tamper-evident evidence certificates aligned to **Section 63, Bharatiya
 Sakshya Adhiniyam 2023**.
