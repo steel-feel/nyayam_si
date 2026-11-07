@@ -6,4 +6,4 @@
   package = "@netlify/plugin-nextjs"
 
 # Set in the Netlify UI (Site configuration → Environment variables):
-#   NEXT_PUBLIC_API_URL = https://<your-backend-host>   (Hono backend, default http://localhost:4000)
+#   NEXT_PUBLIC_API_URL = https://nyayam-backend.onrender.com/ (Hono backend, default http://localhost:4000)
